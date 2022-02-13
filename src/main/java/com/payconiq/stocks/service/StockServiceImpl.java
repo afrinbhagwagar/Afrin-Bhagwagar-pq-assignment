@@ -26,4 +26,18 @@ public class StockServiceImpl implements StockService {
     public List<StockResponse> getAllStocks() {
         return stockRepository.findAll().stream().map(StockConverter::entityToDto).collect(Collectors.toList());
     }
+
+    @Override
+    public StockResponse getStockById(long stockId) {
+        return StockConverter.entityToDto(stockRepository.getOne(stockId));
+    }
+
+    @Override
+    public StockResponse updateStock(StockRequest stockRequest, long stockId) {
+        int priceUpdateOrNot = stockRepository.updateStockPrice(stockRequest.getCurrentPrice(), stockId);
+        if(priceUpdateOrNot==1)
+            return StockConverter.entityToDto(stockRepository.getOne(stockId));
+        //ToDo : Later change below part
+        return null;
+    }
 }

@@ -16,4 +16,8 @@ public interface StockService {
     StockResponse saveStock(StockRequest stock);
 
     List<StockResponse> getAllStocks();
+
+    StockResponse getStockById(long stockId);
+
+    StockResponse updateStock(StockRequest stockRequest, long stockId);
 }
