@@ -7,7 +7,10 @@ import javax.persistence.EntityNotFoundException;
 import com.payconiq.stocks.exceptions.StockNotFoundException;
 import com.payconiq.stocks.model.StockRequest;
 import com.payconiq.stocks.model.StockResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,8 @@ public class StockController {
 
     @Autowired
     private StockService stockService;
+
+    private Logger logger = LoggerFactory.getLogger(StockController.class);
 
     /**
      * post controller to save stocks.
@@ -41,8 +46,10 @@ public class StockController {
      * @return List list of all Stocks present in database.
      */
     @GetMapping
-    public List<StockResponse> getAllStocks() {
-        return stockService.getAllStocks();
+    public List<StockResponse> getAllStocks(@RequestParam(defaultValue = "0") Integer pageNo,
+                                            @RequestParam(defaultValue = "5") Integer pageSize,
+                                            @RequestParam(defaultValue = "id") String sortBy) {
+        return stockService.getAllStocks(pageNo, pageSize, sortBy);
     }
 
     /**
@@ -66,6 +73,22 @@ public class StockController {
     public ResponseEntity<StockResponse> updateStock(
             @RequestBody StockRequest stockRequest, @PathVariable long stockId) {
         return ResponseEntity.ok(stockService.updateStock(stockRequest, stockId));
+    }
+
+    /**
+     * delete controller to delete a particular stock.
+     *
+     * @param stockId delete by stockId.
+     */
+    @DeleteMapping("/{stockId}")
+    public ResponseEntity<Void> deleteStockById(@PathVariable long stockId) {
+        try {
+           stockService.deleteStockById(stockId);
+        } catch (EmptyResultDataAccessException erdae) {
+            logger.error("Stock ID not present to delete. Throwing StockNotFoundException.");
+            throw new StockNotFoundException(erdae.getMessage());
+        }
+        return ResponseEntity.noContent().build();
     }
 
 }

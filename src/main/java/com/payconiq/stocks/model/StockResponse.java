@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * Stock DTO class with getters / setters.
+ * Stock Response to be send for different controllers.
  */
 @Data
 public class StockResponse {

@@ -8,7 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,7 +35,16 @@ public class StockControllerIntegrationTest {
     }
 
     @Test
-    void test(){
+    public void testGetAllPositive() {
+        ResponseEntity<List<StockResponse>> response = restTemplate.exchange("/api/stocks",
+                HttpMethod.GET, null, new ParameterizedTypeReference<List<StockResponse>>() {});
+        assertEquals(5, response.getBody().size());
+        assertEquals("Stock3", response.getBody().get(2).getName());
+        assertEquals(20.0, response.getBody().get(3).getCurrentPrice());
+    }
+
+    @Test
+    void testGetByIdPositive() {
         StockResponse response = restTemplate.getForObject("/api/stocks/2", StockResponse.class);
         assertEquals(2, response.getId());
         assertEquals("Stock2", response.getName());
