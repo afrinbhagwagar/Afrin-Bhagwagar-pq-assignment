@@ -3,8 +3,6 @@ package com.payconiq.stocks.controller;
 import java.util.List;
 
 import javax.persistence.EntityNotFoundException;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import com.payconiq.stocks.exceptions.StockNotFoundException;
 import com.payconiq.stocks.model.StockRequest;

@@ -29,14 +29,14 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public StockResponse getStockById(long stockId) {
-        return StockConverter.entityToDto(stockRepository.getOne(stockId));
+        return StockConverter.entityToDto(stockRepository.getById(stockId));
     }
 
     @Override
     public StockResponse updateStock(StockRequest stockRequest, long stockId) {
         int priceUpdateOrNot = stockRepository.updateStockPrice(stockRequest.getCurrentPrice(), stockId);
         if(priceUpdateOrNot==1)
-            return StockConverter.entityToDto(stockRepository.getOne(stockId));
+            return StockConverter.entityToDto(stockRepository.findById(stockId).get());
         //ToDo : Later change below part
         return null;
     }
