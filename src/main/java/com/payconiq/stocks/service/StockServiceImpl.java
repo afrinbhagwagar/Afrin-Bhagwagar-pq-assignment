@@ -1,5 +1,8 @@
 package com.payconiq.stocks.service;
 
+import com.payconiq.stocks.entity.Stock;
+import com.payconiq.stocks.exceptions.DataUpdateException;
+import com.payconiq.stocks.exceptions.StockNotFoundException;
 import com.payconiq.stocks.model.StockRequest;
 import com.payconiq.stocks.model.StockResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import com.payconiq.stocks.repository.StockRepository;
 import com.payconiq.stocks.utils.StockConverter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,8 +36,12 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public StockResponse getStockById(long stockId) {
-        return StockConverter.entityToDto(stockRepository.getById(stockId));
+    public StockResponse getStockById(long stockId) throws StockNotFoundException{
+        Optional<Stock> opt = stockRepository.findById(stockId);
+        if(opt.isPresent())
+            return StockConverter.entityToDto(stockRepository.findById(stockId).get());
+        else
+            throw new StockNotFoundException("No stock found by the input ID.");
     }
 
     @Override
@@ -41,8 +49,7 @@ public class StockServiceImpl implements StockService {
         int priceUpdateOrNot = stockRepository.updateStockPrice(stockRequest.getCurrentPrice(), stockId);
         if(priceUpdateOrNot==1)
             return StockConverter.entityToDto(stockRepository.findById(stockId).get());
-        //ToDo : Later change below part
-        return null;
+        throw new DataUpdateException("Failed to update Stock price. Probably ID not found or DB connection problems.");
     }
 
     @Override

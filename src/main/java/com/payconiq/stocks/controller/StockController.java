@@ -60,13 +60,7 @@ public class StockController {
      */
     @GetMapping("/{stockId}")
     public StockResponse getStockById(@PathVariable long stockId) {
-        StockResponse stockResponse = null;
-        try {
-            stockResponse = stockService.getStockById(stockId);
-        } catch (EntityNotFoundException enfe) {
-            throw new StockNotFoundException(enfe.getMessage());
-        }
-        return stockResponse;
+        return stockService.getStockById(stockId);
     }
 
     @PatchMapping("/{stockId}")

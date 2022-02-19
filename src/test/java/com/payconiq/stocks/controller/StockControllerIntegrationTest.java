@@ -3,6 +3,7 @@ package com.payconiq.stocks.controller;
 import com.payconiq.stocks.model.StockResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -30,9 +32,15 @@ public class StockControllerIntegrationTest {
     @Value("${spring.security.user.password}")
     private String password;
 
+    private static HttpHeaders headers;
+
     @BeforeEach
-    void initRestTemplate() {
-        restTemplate = restTemplate.withBasicAuth(username, password);
+    void initRestTemplate() {restTemplate = restTemplate.withBasicAuth(username, password);}
+
+    @BeforeAll
+    static void setHeaders(){
+        headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
     }
 
     @Test
@@ -41,8 +49,6 @@ public class StockControllerIntegrationTest {
         inputStockRequest.put("name", "StockNamePostPositive");
         inputStockRequest.put("currentPrice", 78.18);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
         HttpEntity<String> httpEntity = new HttpEntity<>(inputStockRequest.toString(), headers);
 
         ResponseEntity<StockResponse> response = restTemplate.exchange("/api/stocks", HttpMethod.POST, httpEntity, StockResponse.class);
@@ -75,5 +81,44 @@ public class StockControllerIntegrationTest {
         assertEquals(2, response.getId());
         assertEquals("Stock2", response.getName());
         assertEquals(45, response.getCurrentPrice());
+    }
+
+    @Test
+    void testPatchPositive() throws JSONException {
+        restTemplate.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+
+        JSONObject inputStockRequest = new JSONObject();
+        inputStockRequest.put("currentPrice", 2100);
+
+        HttpEntity<String> httpEntity = new HttpEntity<>(inputStockRequest.toString(), headers);
+
+        ResponseEntity<StockResponse> response = restTemplate.exchange("/api/stocks/5", HttpMethod.PATCH, httpEntity, StockResponse.class);
+        assertEquals(2100, response.getBody().getCurrentPrice());
+    }
+
+    @Test
+    void testPatchWhenIDNotPresent() throws JSONException {
+        restTemplate.getRestTemplate().setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+
+        JSONObject inputStockRequest = new JSONObject();
+        inputStockRequest.put("currentPrice", 38);
+
+        HttpEntity<String> httpEntity = new HttpEntity<>(inputStockRequest.toString(), headers);
+
+        ResponseEntity<StockResponse> response = restTemplate.exchange("/api/stocks/9", HttpMethod.PATCH, httpEntity, StockResponse.class);
+        assertEquals(500, response.getStatusCodeValue());
+    }
+
+    @Test
+    void testDeleteByIdPositive() {
+        StockResponse responseBeforeDel = restTemplate.getForObject("/api/stocks/6", StockResponse.class);
+        assertEquals(6, responseBeforeDel.getId());
+        assertEquals("Stock6", responseBeforeDel.getName());
+        assertEquals(640.45, responseBeforeDel.getCurrentPrice());
+
+        restTemplate.delete("/api/stocks/6");
+        ResponseEntity<StockResponse> responseAfterDelete = restTemplate.getForEntity("/api/stocks/6", StockResponse.class);
+
+        assertEquals(404, responseAfterDelete.getStatusCodeValue());
     }
 }

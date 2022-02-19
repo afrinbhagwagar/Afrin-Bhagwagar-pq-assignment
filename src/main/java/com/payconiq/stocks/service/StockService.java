@@ -1,5 +1,6 @@
 package com.payconiq.stocks.service;
 
+import com.payconiq.stocks.exceptions.StockNotFoundException;
 import com.payconiq.stocks.model.StockRequest;
 import com.payconiq.stocks.model.StockResponse;
 
@@ -31,7 +32,7 @@ public interface StockService {
      * @param stockId and input iD for which stock is needed.
      * @return Single stock by ID.
      */
-    StockResponse getStockById(long stockId);
+    StockResponse getStockById(long stockId) throws StockNotFoundException;
 
     /**
      * Update stock by ID and the request body parameters such as currentPrice.
