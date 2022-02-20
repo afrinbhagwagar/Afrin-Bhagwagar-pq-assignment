@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class StockServiceImplTest {
+class StockServiceImplTest {
 
     @InjectMocks
     private StockService stockService = new StockServiceImpl();
